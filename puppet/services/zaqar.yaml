@@ -64,3 +64,7 @@ outputs:
 
       step_config: |
         include ::tripleo::profile::base::zaqar
+      upgrade_tasks:
+        - name: restorecon zaqar.log to ensure httpd has writable access
+          command: restorecon /var/log/zaqar/zaqar.log
+          tags: step5
