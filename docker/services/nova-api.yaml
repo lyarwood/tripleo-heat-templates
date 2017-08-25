@@ -229,3 +229,7 @@ outputs:
           file:
             path: /var/spool/cron/nova
             state: absent
+      skip_upgrade_tasks:
+        - name: Example Ocata step 2 task
+          command: /bin/foo bar
+          when: step == 2 and release == 'ocata'

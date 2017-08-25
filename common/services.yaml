@@ -183,6 +183,16 @@ resources:
           expression: coalesce($.data.role_data, []).where($ != null).select($.get('service_workflow_tasks')).where($ != null).reduce($1.mergeWith($2), {})
           data: {role_data: {get_attr: [ServiceChain, role_data]}}
 
+  SkipUpgradeTasks:
+    type: OS::Heat::Value
+    properties:
+      type: comma_delimited_list
+      value:
+        yaql:
+          # Note we use distinct() here to filter any identical tasks, e.g yum update for all services
+          expression: coalesce($.data, []).where($ != null).select($.get('skip_upgrade_tasks')).where($ != null).flatten().distinct()
+          data: {get_attr: [ServiceChain, role_data]}
+
   UpgradeTasks:
     type: OS::Heat::Value
     properties:
@@ -262,6 +272,7 @@ outputs:
       service_config_settings: {get_attr: [ServiceConfigSettings, value]}
       service_workflow_tasks: {get_attr: [ServiceWorkflowTasks, value]}
       step_config: {get_attr: [PuppetStepConfig, value]}
+      skip_upgrade_tasks: {get_attr: [SkipUpgradeTasks, value]}
       upgrade_tasks: {get_attr: [UpgradeTasks, value]}
       update_tasks: {get_attr: [UpdateTasks, value]}
       upgrade_batch_tasks: {get_attr: [UpgradeBatchTasks, value]}
