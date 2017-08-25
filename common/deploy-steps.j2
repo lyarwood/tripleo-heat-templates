@@ -20,6 +20,7 @@
 {% set deploy_steps_max = 6 -%}
 {% set update_steps_max = 6 -%}
 {% set upgrade_steps_max = 6 -%}
+{% set fast_forward_upgrade_steps_max = 7 -%}
 
 heat_template_version: pike
 
@@ -426,5 +427,38 @@ outputs:
           tasks:
             - include: upgrade_steps_tasks.yaml
               with_sequence: start=1 end={{upgrade_steps_max-1}}
+              loop_control:
+                loop_var: step
+      fast_forward_upgrade_step_tasks: |
+{%- for role in roles %}
+            - include: {{role.name}}/fast_forward_upgrade_tasks.yaml
+              when: role_name == '{{role.name}}'
+{%- endfor %}
+      fast_forward_upgrade_release_tasks: |
+            - include: fast_forward_upgrade_step_tasks.yaml
+              with_sequence: start=1 end={{fast_forward_upgrade_steps_max-1}}
+              loop_control:
+                loop_var: step
+      fast_forward_upgrade_steps_playbook: |
+        # FIXME: Make this configurable
+        - hosts: overcloud-controller-0
+          tasks:
+            - name: Include fast_forward_upgrade_release_tasks.yaml
+              include: fast_forward_upgrade_release_tasks.yaml
+              vars:
+                {% raw %}release: '{{ item }}'{% endraw %}
+            # FIXME: Make this configurable
+              with_items:
+                - 'ocata'
+                - 'pike'
+        - hosts: overcloud
+          tasks:
+            # NOTE(lyarwood): P->Q
+            - include: upgrade_steps_tasks.yaml
+              with_sequence: start=1 end={{upgrade_steps_max-1}}
+              loop_control:
+                loop_var: step
+            - include: deploy_steps_tasks.yaml
+              with_sequence: start=1 end={{deploy_steps_max-1}}
               loop_control:
                 loop_var: step
