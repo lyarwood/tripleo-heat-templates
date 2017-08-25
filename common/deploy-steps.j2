@@ -20,6 +20,7 @@
 {% set deploy_steps_max = 6 -%}
 {% set update_steps_max = 6 -%}
 {% set upgrade_steps_max = 6 -%}
+{% set fast_forward_upgrade_steps_max = 7 -%}
 
 heat_template_version: pike
 
@@ -66,6 +67,11 @@ parameters:
     type: json
     description: Mapping of Role name e.g Controller to the hostname of the
                  associated bootstrap node.
+  FastForwardUpgradeReleases:
+    type: comma_delimited_list 
+    default: ['ocata', 'pike']
+    description: List of releases to fast forward through during upgrade.
+
 conditions:
 {% for step in range(1, deploy_steps_max) %}
   WorkflowTasks_Step{{step}}_Enabled:
@@ -429,5 +435,43 @@ outputs:
           tasks:
             - include: upgrade_steps_tasks.yaml
               with_sequence: start=1 end={{upgrade_steps_max-1}}
+              loop_control:
+                loop_var: step
+      fast_forward_upgrade_role_step_tasks:
+        str_replace:
+          params:
+{%- for role in roles %}
+            {{role.name}}_bootstrap_hostname: {get_param: [RoleBootstrapHostnames, '{{role.name}}']}
+{%- endfor %}
+          template: |
+{%- for role in roles %}
+            - include: {{role.name}}/fast_forward_upgrade_tasks.yaml
+              delegate_to: {{role.name}}_bootstrap_hostname
+              when: 
+                - role_name == '{{role.name}}'
+                - ansible_hostname == {{role.name}}_bootstrap_hostname
+{%- endfor %}
+      fast_forward_upgrade_step_tasks: |
+            - include: fast_forward_upgrade_role_step_tasks.yaml
+              with_sequence: start=0 end={{fast_forward_upgrade_steps_max-1}}
+              loop_control:
+                loop_var: step
+      fast_forward_upgrade_playbook: |
+        - hosts: overcloud 
+          become: true
+          tasks:
+            - include: fast_forward_upgrade_step_tasks.yaml
+              loop_control:
+                loop_var: release
+              with_items: {get_param: FastForwardUpgradeReleases}
+        - hosts: overcloud
+          become: true
+          tasks:
+            - include: upgrade_steps_tasks.yaml
+              with_sequence: start=1 end={{upgrade_steps_max-1}}
+              loop_control:
+                loop_var: step
+            - include: deploy_steps_tasks.yaml
+              with_sequence: start=1 end={{deploy_steps_max-1}}
               loop_control:
                 loop_var: step
