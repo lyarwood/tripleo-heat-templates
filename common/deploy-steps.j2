@@ -62,7 +62,10 @@ parameters:
     description: Number of concurrent processes to use when running docker-puppet to generate config files.
   ctlplane_service_ips:
     type: json
-
+  RoleBootstrapHostnames:
+    type: json
+    description: Mapping of Role name e.g Controller to the hostname of the
+                 associated bootstrap node.
 conditions:
 {% for step in range(1, deploy_steps_max) %}
   WorkflowTasks_Step{{step}}_Enabled:

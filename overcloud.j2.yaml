@@ -569,6 +569,18 @@ resources:
             servers: {get_attr: [{{role.name}}, attributes, nova_server_resource]}
 {% endfor %}
 
+{% for role in roles %}
+  {{role.name}}BootstrapHostname:
+    type: OS::Heat::Value
+    depends_on: {{role.name}}
+    properties:
+      type: string 
+      value:
+        yaql:
+          expression: coalesce($.data, []).first('localhost')
+          data: {get_attr: [{{role.name}}, hostname]}
+{% endfor %}
+
   # This is a different format to *Servers, as it creates a map of lists
   # whereas *Servers creates a map of maps with keys of the nested resource names
   ServerIdMap:
@@ -835,6 +847,10 @@ resources:
       servers:
 {% for role in roles %}
         {{role.name}}: {get_attr: [{{role.name}}Servers, value]}
+{% endfor %}
+      RoleBootstrapHostnames:
+{% for role in roles %}
+        {{role.name}}: {get_attr: [{{role.name}}BootstrapHostname, value]}
 {% endfor %}
       stack_name: {get_param: 'OS::stack_name'}
       EndpointMap: {get_attr: [EndpointMap, endpoint_map]}
