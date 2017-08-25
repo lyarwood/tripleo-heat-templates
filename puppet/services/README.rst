@@ -209,7 +209,6 @@ update sequence, but note update_task selects the steps via a conditional
 referencing the step variable e.g when: step == 2, which is different to the
 tags based approach used for upgrade_tasks (the two may be aligned in future).
 
-
 Nova Server Metadata Settings
 -----------------------------
 
