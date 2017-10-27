@@ -34,6 +34,12 @@ parameters:
     default: 'false'
     description: Set to true to enable package installation at deploy time
     type: boolean
+  FastForwardRepoSwitchType:
+    default: ''
+    type: string
+  FastForwardRepoSwitchArgs:
+    default: {}
+    type: json
 
 outputs:
   role_data:
@@ -76,3 +82,10 @@ outputs:
         - name: Update all packages
           yum: name=* state=latest update_cache=yes  # cache for tripleo/+bug/1703830
           when: step == "3"
+      fast_forward_upgrade_tasks:
+        - name: Set FastForwardRepoArgs fact
+          set_fact: fast_forward_repo_args: {get_param: FastForwardRepoArgs}
+        - name: Enable Fast Forward repos using a command
+          command: '{{item}}'
+          when: step == 0 and {get_param: FastFordwardUpgradeRepoType} == 'cmd'
+          with_dict: fast_forward_repo_args[release]
