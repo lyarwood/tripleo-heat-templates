@@ -522,6 +522,8 @@ outputs:
               loop_control:
                 loop_var: release
               with_items: {get_param: [FastForwardUpgradeReleases]}
+            - name: Update repos to master (Queens)
+              command: tripleo-repos current
       fast_forward_upgrade_release_tasks: |
                 - include_tasks: fast_forward_upgrade_prep_tasks.yaml
                 - include_tasks: fast_forward_upgrade_bootstrap_tasks.yaml
