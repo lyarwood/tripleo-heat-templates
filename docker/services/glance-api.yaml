@@ -253,3 +253,25 @@ outputs:
           when: {get_param: UpgradeRemoveUnusedPackages}
       metadata_settings:
         get_attr: [GlanceApiPuppetBase, role_data, metadata_settings]
+      fast_forward_upgrade_tasks:
+        - name: stop openstack-glance-api
+          service: name=openstack-glance-api state=stopped
+          when: step|int == 2
+        - name: stop openstack-glance-registry
+          service: name=openstack-glance-registry state=stopped
+          when: step|int == 2
+        - name: glance package update
+          yum:
+            name: '{{ package }}'
+            state: latest
+          when: step|int == 6
+          loop_control:
+            loop_var: package
+          with_items:
+            - python-glance-store
+            - python-glanceclient 
+            - openstack-glance 
+            - python-glance
+        - name: glance db sync
+          command: glance-manage db_sync
+          when: step|int == 8
