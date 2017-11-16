@@ -161,3 +161,7 @@ outputs:
           tags: step2
           ignore_errors: True
           when: {get_param: UpgradeRemoveUnusedPackages}
+      fast_forward_upgrade_tasks:
+        - name: Stop neutron_openvswitch_agent
+          service: name=neutron-openvswitch-agent state=stopped
+          when: step|int == 2
