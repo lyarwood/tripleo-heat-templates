@@ -213,3 +213,13 @@ outputs:
           tags: step2
           ignore_errors: True
           when: {get_param: UpgradeRemoveUnusedPackages}
+      fast_forward_upgrade_tasks:
+        - name: stop openstack-cinder-api
+          service: name=openstack-cinder-api state=stopped
+          when: step|int == 2
+        - name: Cinder package update
+          command: yum update -y *cinder*
+          when: step|int == 6
+        - name: Cinder db sync
+          command: cinder-manage db sync
+          when: step|int == 8
