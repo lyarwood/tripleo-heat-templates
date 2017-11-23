@@ -507,6 +507,7 @@ outputs:
 {%- endfor %}
       upgrade_steps_playbook: |
         - hosts: overcloud
+          become: true
           tasks:
             - include: upgrade_steps_tasks.yaml
               with_sequence: start=1 end={{upgrade_steps_max-1}}
