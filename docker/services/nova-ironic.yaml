@@ -143,3 +143,7 @@ outputs:
           tags: step2
           when: nova_ironic_enabled.rc == 0
           service: name=openstack-nova-compute state=stopped enabled=no
+      fast_forward_upgrade_tasks:
+        - name: Stop and disable nova-compute service
+          service: name=openstack-nova-compute state=stopped
+          when: step|int == 2

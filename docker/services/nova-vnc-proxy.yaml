@@ -141,3 +141,7 @@ outputs:
           tags: step2
           ignore_errors: True
           when: {get_param: UpgradeRemoveUnusedPackages}
+      fast_forward_upgrade_tasks:
+        - name: Stop and disable nova-novncproxy service
+          service: name=openstack-nova-novncproxy state=stopped
+          when: step|int == 2
