@@ -420,6 +420,7 @@ outputs:
               name: Host prep steps
               gather_facts: no
               any_errors_fatal: yes
+              become: true
               vars:
                 bootstrap_server_id: BOOTSTRAP_SERVER_ID
               tasks:
