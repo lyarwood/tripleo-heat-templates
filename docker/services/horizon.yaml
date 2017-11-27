@@ -190,5 +190,6 @@ outputs:
         - name: Stop and disable horizon service (running under httpd)
           tags: step2
           service: name=httpd state=stopped enabled=no
+          ignore_errors: True
       metadata_settings:
         get_attr: [HorizonBase, role_data, metadata_settings]

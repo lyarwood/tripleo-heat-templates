@@ -134,6 +134,7 @@ outputs:
         - name: Stop and disable cinder_scheduler service
           tags: step2
           service: name=openstack-cinder-scheduler state=stopped enabled=no
+          ignore_errors: True
         - name: Remove openstack-cinder package if operator requests it
           yum: name=openstack-cinder state=removed
           tags: step2

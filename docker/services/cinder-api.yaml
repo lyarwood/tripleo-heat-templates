@@ -203,6 +203,7 @@ outputs:
         - name: Stop and disable cinder_api service
           tags: step2
           service: name=httpd state=stopped enabled=no
+          ignore_errors: True
         - name: remove old cinder cron jobs
           tags: step2
           file:

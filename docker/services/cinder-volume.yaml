@@ -209,6 +209,7 @@ outputs:
       upgrade_tasks:
         - name: Stop and disable cinder_volume service
           tags: step2
+          ignore_errors: True
           service: name=openstack-cinder-volume state=stopped enabled=no
         - name: Remove openstack-cinder package if operator requests it
           yum: name=openstack-cinder state=removed
