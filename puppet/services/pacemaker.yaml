@@ -168,3 +168,7 @@ outputs:
         - name: Start pacemaker cluster
           when: step == "4"
           pacemaker_cluster: state=online
+      fast_forward_upgrade_tasks:
+        - name: Stop pacemaker cluster
+          pacemaker_cluster: state=offline
+          when: step|int == 1 and release == 'ocata'
